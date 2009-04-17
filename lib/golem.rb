@@ -48,6 +48,7 @@ module Golem
       self.class_eval do
         define_method(:current_state) do
           state = self.send(state_machine_def.current_state_method)
+          state = self.current_state = self.send(statemachine_name).initial_state if state.nil?
           state = state.to_sym if state.is_a?(String)
           self.send(statemachine_name).states[state].name
         end
@@ -55,7 +56,7 @@ module Golem
         # FIXME: Defining an after_initialize callback may lead to degraded performance... we need to find a better
         #        way to set the initial state
         if self.superclass.name.to_s == 'ActiveRecord::Base'
-          puts "HAVE ACTIVE RECORD"
+          #puts "HAVE ACTIVE RECORD"
           #define_method(:after_initialize) do
           #  self.send("#{state_machine_def.current_state_method}=", state_machine_def.machine.initial_state.name)
           #end
@@ -68,7 +69,7 @@ module Golem
             self.current_state
           end
         else
-          puts "NO ACTIVE RECORD"
+          #puts "NO ACTIVE RECORD"
           #alias_method :_initialize, :initialize
           #define_method(:initialize) do |*args|
           #  self.send("#{state_machine_def.current_state_method}=", state_machine_def.machine.initial_state.name)
