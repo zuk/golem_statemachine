@@ -11,6 +11,7 @@ module Golem
 
       def initialize
         @machine = Golem::Model::StateMachine.new
+        @current_state_method ||= :state
       end
 
       def machine
