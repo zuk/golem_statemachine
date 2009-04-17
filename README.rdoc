@@ -12,7 +12,7 @@ Here is the Golem Statemachine definition for this state machine:
 
   class Document
     attr_accessor :state
-    
+
     def initialize
       @has_signature = false
     end
@@ -35,11 +35,11 @@ Here is the Golem Statemachine definition for this state machine:
 
       state :SUBMITTED do
         on :review do
-          transition :to => :APPROVED, :if => :has_signature? 
+          transition :to => :APPROVED, :if => :has_signature?
           transition :to => :REJECTED
         end
       end
-      
+
       state :REJECTED do
         on :revise, :to => :REVISED
       end
@@ -51,6 +51,7 @@ Here is the Golem Statemachine definition for this state machine:
       state :APPROVED
     end
   end
+
 
 Now we can instantiate a Document and use it like so:
 
@@ -69,7 +70,35 @@ Now we can instantiate a Document and use it like so:
 For a more complicated example, see <tt>examples/seminar_enrollment.rb</tt>.
 
 
-= Golem vs. AASM
+== Installation
+
+Install as a Rails plugin:
+
+  script/plugin install git://github.com/zuk/golem_statemachine.git
+
+Use it in your model:
+  
+  class Example < ActiveRecord::Base
+
+    include Golem
+
+    define_statemachine do
+      # ... write your statemachine definition ...
+    end
+
+  end
+
+Make sure that the underlying SQL table has a 'state' column of type string.
+If you want to store the state in a different column, use <tt>current_state_from</tt> like this:
+
+  define_statemachine do
+    current_state_from :status
+
+    # ...
+  end
+
+
+== Golem vs. AASM
 
 There is already another popular FSM implementation for Ruby -- {rubyist's AASM}[http://github.com/rubyist/aasm] (also known as acts_as_state_machine). Golem was developed from scratch as an alternative to AASM, with the intention of a better DSL and cleaner, easier to read code. 
 
