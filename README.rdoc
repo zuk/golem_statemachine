@@ -13,6 +13,8 @@ A light switch is initially in an "off" state. When you flip the switch, it tran
 
 Here's the UML state machine diagram of an on/off switch:
 
+http://cloud.github.com/downloads/zuk/golem_statemachine/on_off_switch_UML.png
+
 And here's what this looks like in Ruby code using Golem:
 
   require 'golem'
@@ -45,7 +47,7 @@ And here's what this looks like in Ruby code using Golem:
 
 === The DSL Syntax
 
-To define a statemachine (inside a Ruby class definition, after including the Golem module), place your definition inside the `define_statemachine` block:
+To define a statemachine (inside a Ruby class definition, after including the Golem module), place your definition inside the <tt>define_statemachine</tt> block:
   
   class Monster
     include Golem
@@ -54,7 +56,7 @@ To define a statemachine (inside a Ruby class definition, after including the Go
     end
   end
 
-Now to create some states (we skip the `include Golem` call in subsequent code, but it should still be there!):
+Now to create some states (we skip the <tt>include Golem</tt> call in subsequent code, but it should still be there!):
 
   class Monster
     define_statemachine do
@@ -74,7 +76,7 @@ And an event:
     end
   end
 
-The block for each state describes what will happen when a given event occurs. In this case, if the monster is in the `HUNGRY` state and the `eat` event occurs, the monster becomes `SATIATED`.
+The block for each state describes what will happen when a given event occurs. In this case, if the monster is in the <tt>HUNGRY</tt> state and the <tt>eat</tt> event occurs, the monster becomes <tt>SATIATED</tt>.
 
 Now to make things a bit more interesting:
 
@@ -94,7 +96,7 @@ Now to make things a bit more interesting:
     end
   end
 
-Here the monster becomes `SATIATED` only if it likes the food that it has been given. The `:if` option (a.k.a. a 'guard' condition) takes a Proc that checks whether the monster likes the food. To better illustrate how this works, here's how we would use our Monster statemachine:
+Here the monster becomes <tt>SATIATED</tt> only if it likes the food that it has been given. The <tt>:if</tt> option (a.k.a. a 'guard' condition) takes a Proc that checks whether the monster likes the food. To better illustrate how this works, here's how we would use our Monster statemachine:
 
   monster = Monster.new
   
@@ -128,9 +130,9 @@ In the interest of prettier code, we can re-write the same definition as follows
     end
   end
 
-Note that `:if` can take a Symbol instead of a Proc. Unless there's a good reason to do so, you should probably avoid using Procs and instead refer to methods within your class definition by name. This makes it easier to keep your business logic clean and organized. Also, if a transition does not cause the object to change states (i.e. we self-transiton from `HUNGRY` back to `HUNGRY`), you can skip the `:to` part. Note too that you can use a block to specify a transition action (instead of using the `:action` option).
+Note that <tt>:if</tt> (i.e. the transition guard condition) can take a Symbol instead of a Proc. Unless there's a good reason to do so, you should probably avoid using Procs and instead refer to methods within your class definition by name. This makes it easier to keep your business logic clean and organized. Also, if a transition does not cause the object to change states (i.e. we self-transiton from <tt>HUNGRY</tt> back to <tt>HUNGRY</tt>), you can skip the <tt>:to</tt> part. Note too that you can use a block to specify a transition action (instead of using the <tt>:action</tt> option).
 
-Finally, every state can have an `enter` and `exit` action. This can take the form of a callback (via a Symbol), a Proc, or a block:
+Finally, every state can have an <tt>enter</tt> and <tt>exit</tt> action. This can take the form of a callback (via a Symbol), a Proc, or a block:
 
   class Monster
     def likes?(food)
@@ -154,7 +156,7 @@ Finally, every state can have an `enter` and `exit` action. This can take the fo
     end
   end
 
-For a full list of commands available inside the define_statemachine block, have a look at the code in `golem/dsl` (starting with `golem/dsl/state_machine_def.rb`).
+For a full list of commands available inside the define_statemachine block, have a look at the code in <tt>golem/dsl</tt> (starting with <tt>golem/dsl/state_machine_def.rb</tt>).
 
 
 === A Real-World Example: Seminar Registration
@@ -162,6 +164,8 @@ For a full list of commands available inside the define_statemachine block, have
 Monsters and On/Off switches are all well end good, but once you get your head around how a finite state machine works, you'll probably want to do something a little more useful. Here's an example of a course registration system, adapted from "Scott W. Ambler's primer on UML2 State Machine Diagrams"[http://www.agilemodeling.com/artifacts/stateMachineDiagram.htm]:
 
 The UML state machine diagram:
+
+http://cloud.github.com/downloads/zuk/golem_statemachine/seminar_enrollment_UML.png
 
 The Ruby implementation (see blow for discussion):
 
@@ -177,7 +181,6 @@ The Ruby implementation (see blow for discussion):
   
     def initialize
       @students = [] # list of students enrolled in the course
-      @waiting_list = [] # list of students on the waiting list
       @max_class_size = 5
     end
   
@@ -196,7 +199,19 @@ The Ruby implementation (see blow for discussion):
     def add_student_to_waiting_list(student)
       @waiting_list << student
     end
-  
+
+    def create_waiting_list
+      @waiting_list = []
+    end
+
+    def notify_waiting_list_that_enrollment_is_closed
+      @waiting_list.each{|student| puts "#{student}: waiting list is closed!"
+    end
+
+    def notify_students_that_the_seminar_is_cancelled
+      (@students + @waiting_list).each{|student| puts "#{student}: the seminar has been cancelled!"
+    end  
+
   
     include Golem
     
@@ -215,7 +230,7 @@ The Ruby implementation (see blow for discussion):
           transition :if => :seats_available? do |seminar, student|
             seminar.students << student
           end
-          transition :to => :full do |seminar, student|
+          transition :to => :full, :if => Proc.new{|seminar, student| not seminar.student_is_enrolled?} do |seminar, student|
             seminar.add_student_to_waiting_list(student)
           end
         end
