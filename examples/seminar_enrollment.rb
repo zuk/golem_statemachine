@@ -10,7 +10,6 @@ class Seminar
 
   def initialize
     @students = [] # list of students enrolled in the course
-    @waiting_list = [] # list of students on the waiting list
     @max_class_size = 5
   end
 
@@ -30,9 +29,21 @@ class Seminar
     @waiting_list << student
   end
 
+  def create_waiting_list
+    @waiting_list = []
+  end
+
+  def notify_waiting_list_that_enrollment_is_closed
+    @waiting_list.each{|student| puts "#{student}: waiting list is closed!"
+  end
+
+  def notify_students_that_the_seminar_is_cancelled
+    (@students + @waiting_list).each{|student| puts "#{student}: the seminar has been cancelled!"
+  end  
+
 
   include Golem
-  
+
   define_statemachine do
     state :proposed do
       on :schedule, :to => :scheduled
@@ -48,7 +59,7 @@ class Seminar
         transition :if => :seats_available? do |seminar, student|
           seminar.students << student
         end
-        transition :to => :full do |seminar, student|
+        transition :to => :full, :if => Proc.new{|seminar, student| not seminar.student_is_enrolled?} do |seminar, student|
           seminar.add_student_to_waiting_list(student)
         end
       end
@@ -92,7 +103,6 @@ class Seminar
     initial_state :proposed
     current_state_from :status
 
-    on_all_events Proc.new{|obj, event, event_args| puts "Firing #{event.name.inspect}(#{event_args.collect{|arg| arg.inspect}.join(",")})"}
     on_all_transitions Proc.new{|obj, event, transition, event_args| puts "Transitioning from #{transition.from.name.inspect} to #{transition.to.name.inspect}"}
   end
 end
@@ -127,5 +137,5 @@ s.drop_student! "tony"
 puts s.inspect
 s.drop_student! "rich"
 puts s.inspect
-s.drop_student! "yoohoo"
+s.drop_student! "eva"
 puts s.inspect
