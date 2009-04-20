@@ -17,6 +17,12 @@ module Golem
         @callbacks = {}
         @callbacks[:action] = options[:action]
       end
+
+      def to_s
+        s ="Transition from #{from} to #{to} [#{guard.to_s}]"
+        s << " / #{callbacks.collect{|k,v| v.to_s}.join(",")}" unless callbacks.blank? || callbacks.values.all?{|v| v.blank?}
+        return s
+      end
     end
   end
 end

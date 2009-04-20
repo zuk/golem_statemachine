@@ -28,6 +28,10 @@ module Golem
           end
         end
       end
+
+      def to_s
+        "#{@callback.inspect}"
+      end
     end
   end
 end
