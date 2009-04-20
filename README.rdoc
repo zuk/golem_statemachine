@@ -1,73 +1,197 @@
 = Golem Statemachine
 
-Golem adds {Finite State Machine (FSM)}[http://en.wikipedia.org/wiki/Finite_state_machine] behaviour to Ruby classes. 
+Golem adds {Finite State Machine (FSM)}[http://en.wikipedia.org/wiki/Finite_state_machine] behaviour to Ruby classes. Basically, you get a nice DSL (domain-specific language) for defining the FSM rules, and some functionality to enforce those rules in your objects. Although Golem was designed specifically with ActiveRecord in mind, it should work with any Ruby object.
 
-Ruby objects with Finite State Machine behaviour are always in some given state, and are allowed to transition between states based on the rules that define your FSM. The golem_statemachine library provides a simple DSL (domain-specific language) for defining the FSM rules. It is designed specifically with ActiveRecord in mind, but should work with any Ruby object.
+Although the FSM pattern can potentially apply to a number of scenarios, in practice you'll probably find it most useful in implementing complex business logic -- the kind that requires multi-page UML diagrams describing an entity's behavior over a series of events. Golem makes it much easier to implement and keep track of complicated, stateful behaviour, and the DSL you use to define your state machine in Ruby is specifically designed to make translation to and from UML easy.
 
-For example, you might want to implement an approval workflow process for a Document class. The Document has five possible states: 'NEW', 'SUBMITTED', 'REJECTED', 'REVISED', 'APPROVED', and three possible events: 'submit', 'review', 'revise'. NEW and REVISED documents can be submitted, SUBMITTED documents can be reviewed, and REJECTED documents can be revised.
+See below for installation instructions. But first, some examples:
 
-Here is the Golem Statemachine definition for this state machine:
+
+=== A Trivial Example: The ON/OFF Switch
+
+A light switch is initially in an "off" state. When you flip the switch, it transitions to an "on" state. A subsequent "flip switch" event returns it back to an off state. 
+
+Here's the UML state machine diagram of an on/off switch:
+
+And here's what this looks like in Ruby code using Golem:
 
   require 'golem'
 
-  class Document
-    attr_accessor :state
-
-    def initialize
-      @has_signature = false
-    end
-
-    def sign!
-      @has_signature = true
-    end
-
-    def has_signature?
-      @has_signature
-    end
-
+  class LightSwitch
     include Golem
+
     define_statemachine do
-      initial_state :NEW
+      initial_state :OFF
 
-      state :NEW do
-        on :submit, :to => :SUBMITTED
+      state :OFF do
+        on :flip_switch, :to => :ON
       end
 
-      state :SUBMITTED do
-        on :review do
-          transition :to => :APPROVED, :if => :has_signature?
-          transition :to => :REJECTED
-        end
+      state :ON do
+        on :flip_switch, :to => :OFF
       end
-
-      state :REJECTED do
-        on :revise, :to => :REVISED
-      end
-
-      state :REVISED do
-        on :submit, :to => :SUBMITTED
-      end
-
-      state :APPROVED
     end
+
   end
 
 
-Now we can instantiate a Document and use it like so:
+  switch = LightSwitch.new
+  puts switch.current_state # ==> :OFF
+  switch.flip_switch!
+  puts switch.current_state # ==> :ON
+  switch.flip_switch!
+  puts switch.current_state # ==> :OFF
 
-  doc = Document.new
-  doc.submit!
-  puts doc.state # ==> :SUBMITTED
-  doc.review!
-  puts doc.state # ==> :REJECTED
-  doc.revise!
-  puts doc.state # ==> :REVISED
-  doc.sign!
-  doc.submit!
-  doc.review!
-  puts doc.state # ==> :APPROVED
 
-For a more complicated example, see <tt>examples/seminar_enrollment.rb</tt>.
+=== A Real-World Example: Seminar Registration
+
+On/Off switches are all well end good, but once you get your head around how a finite state machine works, you'll want to do something a little more useful. Here's an example of a course registration system, adapted from [Scott W. Ambler's primer on UML2 State Machine Diagrams](http://www.agilemodeling.com/artifacts/stateMachineDiagram.htm):
+
+The UML state machine diagram:
+
+The Ruby implementation (see blow for discussion):
+
+  $: << File.expand_path(File.dirname(__FILE__)+"/../lib")
+  require 'golem'
+
+
+  class Seminar
+    attr_accessor :status
+    attr_accessor :students
+    attr_accessor :waiting_list
+    attr_accessor :max_size
+  
+    def initialize
+      @students = [] # list of students enrolled in the course
+      @waiting_list = [] # list of students on the waiting list
+      @max_class_size = 5
+    end
+  
+    def seats_available?
+      @students.size < @max_class_size
+    end
+  
+    def waiting_list_is_empty?
+      @waiting_list.empty?
+    end
+  
+    def student_is_enrolled?(student)
+      @students.include? student
+    end
+  
+    def add_student_to_waiting_list(student)
+      @waiting_list << student
+    end
+  
+  
+    include Golem
+    
+    define_statemachine do
+      state :proposed do
+        on :schedule, :to => :scheduled
+      end
+  
+      state :scheduled do
+        on :open, :to => :open_for_enrollment
+      end
+  
+      state :open_for_enrollment do
+        on :close, :to => :closed_to_enrollment
+        on :enroll_student do
+          transition :if => :seats_available? do |seminar, student|
+            seminar.students << student
+          end
+          transition :to => :full do |seminar, student|
+            seminar.add_student_to_waiting_list(student)
+          end
+        end
+      end
+  
+      state :full do
+        on :move_to_bigger_classroom, :to => :open_for_enrollment
+        on :drop_student do
+          transition :to => :open_for_enrollment, 
+            :if => Proc.new{|seminar, student| seminar.student_is_enrolled?(student) && seminar.waiting_list_is_empty?} do
+              seminar.students.delete student
+            end
+          transition :if => :student_is_enrolled? do |seminar, student|
+            seminar.students.delete student
+            seminar.enroll_student! seminar.waiting_list.shift
+          end
+        end
+        on :enroll_student do
+          transition :if => :seats_available? do |seminar, student|
+            seminar.students << student
+          end
+          transition :action => :add_student_to_waiting_list
+        end
+        on :close, :to => :closed_to_enrollment
+        enter :create_waiting_list
+      end
+  
+      state :closed_to_enrollment do
+        enter :notify_waiting_list_that_enrollment_is_closed
+      end
+  
+      state :cancelled do
+        enter :notify_students_that_the_seminar_is_cancelled
+      end
+  
+      # The 'cancel' event can occur in all states.
+      all_states.each do |state|
+        state.on :cancel, :to => :cancelled
+      end
+  
+      initial_state :proposed
+      current_state_from :status
+  
+      on_all_events Proc.new{|obj, event, event_args| puts "Firing #{event.name.inspect}(#{event_args.collect{|arg| arg.inspect}.join(",")})"}
+      on_all_transitions Proc.new{|obj, event, transition, event_args| puts "Transitioning from #{transition.from.name.inspect} to #{transition.to.name.inspect}"}
+    end
+  end
+  
+  
+  s = Seminar.new
+  s.schedule!
+  s.open!
+  s.enroll_student! "bobby"
+  puts s.inspect
+  s.enroll_student! "eva"
+  puts s.inspect
+  s.enroll_student! "sally"
+  puts s.inspect
+  s.enroll_student! "matt"
+  puts s.inspect
+  s.enroll_student! "karina"
+  puts s.inspect
+  s.enroll_student! "tony"
+  puts s.inspect
+  s.enroll_student! "rich"
+  puts s.inspect
+  s.enroll_student! "suzie"
+  puts s.inspect
+  s.enroll_student! "fred"
+  puts s.inspect
+  s.drop_student! "sally"
+  puts s.inspect
+  s.drop_student! "bobby"
+  puts s.inspect
+  s.drop_student! "tony"
+  puts s.inspect
+  s.drop_student! "rich"
+  puts s.inspect
+  s.drop_student! "eva"
+  puts s.inspect
+
+There are a number of things to note in the above code:
+
+ 1. We use `current_state_from` to tell Golem that the current state will be stored in the `status` column (by
+    default the state is stored in the `state` column).
+ 2. We log each transition by specifying a callback function using `on_all_transitions`. The Seminar object's 
+    `log_transition` method will be called on each successful transition. The Event that caused the transition, 
+    and the Transition itself are automatically passed as the first two arguments to the callback, along with any 
+    other arguments that may have been passed in the event trigger.
+ 3. 
 
 
 == Installation
@@ -76,7 +200,7 @@ Install as a Rails plugin:
 
   script/plugin install git://github.com/zuk/golem_statemachine.git
 
-Use it in your model:
+If using Golem in an ActiveRecord model:
   
   class Example < ActiveRecord::Base
 
@@ -88,7 +212,7 @@ Use it in your model:
 
   end
 
-Make sure that the underlying SQL table has a 'state' column of type string.
+Also make sure that the underlying SQL table has a 'state' column of type string.
 If you want to store the state in a different column, use <tt>current_state_from</tt> like this:
 
   define_statemachine do
@@ -96,6 +220,8 @@ If you want to store the state in a different column, use <tt>current_state_from
 
     # ...
   end
+
+For plain old Ruby classes, everything works the same way, except the state is not persisted, only stored in the object's member variable (@state, by default).
 
 
 == Golem vs. AASM
