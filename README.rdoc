@@ -2,7 +2,7 @@
 
 Golem adds {Finite State Machine (FSM)}[http://en.wikipedia.org/wiki/Finite_state_machine] behaviour to Ruby classes. Basically, you get a nice DSL (domain-specific language) for defining the FSM rules, and some functionality to enforce those rules in your objects. Although Golem was designed specifically with ActiveRecord in mind, it should work with any Ruby object.
 
-The Finite State Machine pattern has many potential uses, but practice you'll probably find it most useful in implementing complex business logic -- the kind that requires multi-page UML diagrams describing an entity's behavior over a series of events. Golem makes it much easier to implement and keep track of complicated, stateful behaviour, and the DSL you use to define your state machine in Ruby is specifically designed to make translation to and from UML easy.
+The Finite State Machine pattern has many potential uses, but in practice you'll probably find it most useful in implementing complex business logic -- the kind that requires multi-page UML diagrams describing an entity's behavior over a series of events. Golem makes it much easier to implement and keep track of complicated, stateful behaviour, and the DSL you use to define your state machine in Ruby is specifically designed to make translation to and from UML easy.
 
 
 ==== Contents
