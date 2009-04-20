@@ -2,12 +2,12 @@
 
 === Contents
 
-  1. Intro
-  2. A Trivial Example: The ON/OFF Switch
-  3. The DSL Syntax: A Tutorial
-  4. A Real-World Example: Seminar Registration
-  5. Installation
-  6. Gollem vs. AASM
+1. <b>Intro</b>
+2. <b>A Trivial Example: The ON/OFF Switch</b>
+3. <b>The DSL Syntax: A Tutorial</b>
+4. <b>A Real-World Example: Seminar Registration</b>
+5. <b>Installation</b>
+6. <b>Gollem vs. AASM</b>
 
 
 
