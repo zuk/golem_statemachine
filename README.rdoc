@@ -1,5 +1,16 @@
 = Golem Statemachine
 
+=== Contents
+
+  1. Intro
+  2. A Trivial Example: The ON/OFF Switch
+  3. The DSL Syntax: A Tutorial
+  4. A Real-World Example: Seminar Registration
+  5. Installation
+  6. Gollem vs. AASM
+
+
+
 Golem adds {Finite State Machine (FSM)}[http://en.wikipedia.org/wiki/Finite_state_machine] behaviour to Ruby classes. Basically, you get a nice DSL (domain-specific language) for defining the FSM rules, and some functionality to enforce those rules in your objects. Although Golem was designed specifically with ActiveRecord in mind, it should work with any Ruby object.
 
 Although the FSM pattern can potentially apply to a number of scenarios, in practice you'll probably find it most useful in implementing complex business logic -- the kind that requires multi-page UML diagrams describing an entity's behavior over a series of events. Golem makes it much easier to implement and keep track of complicated, stateful behaviour, and the DSL you use to define your state machine in Ruby is specifically designed to make translation to and from UML easy.
@@ -45,7 +56,7 @@ And here's what this looks like in Ruby code using Golem:
   puts switch.current_state # ==> :OFF
 
 
-=== The DSL Syntax
+=== The DSL Syntax: A Tutorial
 
 To define a statemachine (inside a Ruby class definition, after including the Golem module), place your definition inside the <tt>define_statemachine</tt> block:
   
@@ -58,6 +69,8 @@ To define a statemachine (inside a Ruby class definition, after including the Go
 
 Now to create some states (we skip the <tt>include Golem</tt> call in subsequent code, but it should still be there!):
 
+http://cloud.github.com/downloads/zuk/golem_statemachine/monster_1_UML.png
+
   class Monster
     define_statemachine do
       state :HUNGRY
@@ -66,6 +79,8 @@ Now to create some states (we skip the <tt>include Golem</tt> call in subsequent
   end
 
 And an event:
+
+http://cloud.github.com/downloads/zuk/golem_statemachine/monster_2_UML.png
 
   class Monster
     define_statemachine do
@@ -79,6 +94,8 @@ And an event:
 The block for each state describes what will happen when a given event occurs. In this case, if the monster is in the <tt>HUNGRY</tt> state and the <tt>eat</tt> event occurs, the monster becomes <tt>SATIATED</tt>.
 
 Now to make things a bit more interesting:
+
+http://cloud.github.com/downloads/zuk/golem_statemachine/monster_3_UML.png
 
   class Monster
     def likes?(food)
@@ -110,7 +127,7 @@ Here the monster becomes <tt>SATIATED</tt> only if it likes the food that it has
   monster.eat!(food)
   puts monster.current_state   # ==> :SATIATED
 
-In the interest of prettier code, we can re-write the same definition as follows:
+In the interest of cleaner, prettier code, we can re-write the same definition as follows:
 
   class Monster
     def likes?(food)
@@ -133,6 +150,8 @@ In the interest of prettier code, we can re-write the same definition as follows
 Note that <tt>:if</tt> (i.e. the transition guard condition) can take a Symbol instead of a Proc. Unless there's a good reason to do so, you should probably avoid using Procs and instead refer to methods within your class definition by name. This makes it easier to keep your business logic clean and organized. Also, if a transition does not cause the object to change states (i.e. we self-transiton from <tt>HUNGRY</tt> back to <tt>HUNGRY</tt>), you can skip the <tt>:to</tt> part. Note too that you can use a block to specify a transition action (instead of using the <tt>:action</tt> option).
 
 Finally, every state can have an <tt>enter</tt> and <tt>exit</tt> action. This can take the form of a callback (via a Symbol), a Proc, or a block:
+
+http://cloud.github.com/downloads/zuk/golem_statemachine/monster_4_UML.png
 
   class Monster
     def likes?(food)
@@ -161,7 +180,7 @@ For a full list of commands available inside the define_statemachine block, have
 
 === A Real-World Example: Seminar Registration
 
-Monsters and On/Off switches are all well end good, but once you get your head around how a finite state machine works, you'll probably want to do something a little more useful. Here's an example of a course registration system, adapted from "Scott W. Ambler's primer on UML2 State Machine Diagrams"[http://www.agilemodeling.com/artifacts/stateMachineDiagram.htm]:
+Monsters and On/Off switches are all well end good, but once you get your head around how a finite state machine works, you'll probably want to do something a little more useful. Here's an example of a course registration system, adapted from {Scott W. Ambler's primer on UML2 State Machine Diagrams}[http://www.agilemodeling.com/artifacts/stateMachineDiagram.htm]:
 
 The UML state machine diagram:
 
