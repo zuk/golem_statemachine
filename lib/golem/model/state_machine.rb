@@ -55,12 +55,18 @@ module Golem
         from_state = states[obj.current_state]
         possible_transitions = from_state.transitions_on_event[event.name]
 
-        raise Golem::ImpossibleEvent, "#{obj} is in a#{"n" if from_state.name.to_s =~ /^[aeiouh]/} #{from_state.name.inspect} state and cannot accept the event #{event.name.inspect}" if possible_transitions.blank?
+        selected_transition = determine_transition(possible_transitions, obj, *args)
 
-        determine_transition(possible_transitions, obj, *args)
+        if selected_transition.blank?
+          raise Golem::ImpossibleEvent, "#{obj} cannot currently accept the event #{event.name.inspect}.\n\tPossible transitions were: \n\t\t#{possible_transitions.collect.collect{|t| t.to_s}.join("\n\t\t")}"
+        end
+
+        return selected_transition
       end
 
       def determine_transition(possible_transitions, obj, *args)
+        return nil if possible_transitions.blank?
+
         possible_transitions.each do |transition|
           if transition.guard
             next unless transition.guard.call(obj, *args)
