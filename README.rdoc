@@ -43,9 +43,123 @@ And here's what this looks like in Ruby code using Golem:
   puts switch.current_state # ==> :OFF
 
 
+=== The DSL Syntax
+
+To define a statemachine (inside a Ruby class definition, after including the Golem module), place your definition inside the `define_statemachine` block:
+  
+  class Monster
+    include Golem
+    define_statemachine do
+      
+    end
+  end
+
+Now to create some states (we skip the `include Golem` call in subsequent code, but it should still be there!):
+
+  class Monster
+    define_statemachine do
+      state :HUNGRY
+      state :SATIATED
+    end
+  end
+
+And an event:
+
+  class Monster
+    define_statemachine do
+      state :HUNGRY do
+        on :eat, :to => :SATIATED
+      end
+      state :SATIATED
+    end
+  end
+
+The block for each state describes what will happen when a given event occurs. In this case, if the monster is in the `HUNGRY` state and the `eat` event occurs, the monster becomes `SATIATED`.
+
+Now to make things a bit more interesting:
+
+  class Monster
+    def likes?(food)
+      return true if food.kind_of?(Human)
+    end
+  
+    define_statemachine do
+      state :HUNGRY do
+        on :eat do
+          transition :to => :SATIATED, :if => Proc.new{|obj, food| obj.likes?(food)}
+          transition :to => :HUNGRY, :action => Proc.new{|obj| puts "BLAH!!"}
+        end
+      end
+      state :SATIATED
+    end
+  end
+
+Here the monster becomes `SATIATED` only if it likes the food that it has been given. The `:if` option (a.k.a. a 'guard' condition) takes a Proc that checks whether the monster likes the food. To better illustrate how this works, here's how we would use our Monster statemachine:
+
+  monster = Monster.new
+  
+  food = Banana.new
+
+  monster.eat!(food)           # ==> "BLAH!!"
+  puts monster.current_state   # ==> :HUNGRY
+
+  food = Human.find(:first)
+
+  monster.eat!(food)
+  puts monster.current_state   # ==> :SATIATED
+
+In the interest of prettier code, we can re-write the same definition as follows:
+
+  class Monster
+    def likes?(food)
+      food.kind_of?(Human)
+    end
+  
+    define_statemachine do
+      state :HUNGRY do
+        on :eat do
+          transition :to => :SATIATED, :if => :likes?
+          transition do |obj| 
+            puts "BLAH!!"
+          end
+        end
+      end
+      state :SATIATED
+    end
+  end
+
+Note that `:if` can take a Symbol instead of a Proc. Unless there's a good reason to do so, you should probably avoid using Procs and instead refer to methods within your class definition by name. This makes it easier to keep your business logic clean and organized. Also, if a transition does not cause the object to change states (i.e. we self-transiton from `HUNGRY` back to `HUNGRY`), you can skip the `:to` part. Note too that you can use a block to specify a transition action (instead of using the `:action` option).
+
+Finally, every state can have an `enter` and `exit` action. This can take the form of a callback (via a Symbol), a Proc, or a block:
+
+  class Monster
+    def likes?(food)
+      food.kind_of?(Human)
+    end
+  
+    define_statemachine do
+      state :HUNGRY do
+        on :eat do
+          transition :to => :SATIATED, :if => :likes?
+          transition do |obj| 
+            puts "BLAH!!"
+          end
+        end
+      end
+      state :SATIATED do
+        enter do
+          puts "BURP!!!"
+        end
+      end
+    end
+  end
+
+For a full list of commands available inside the define_statemachine block, have a look at the code in `golem/dsl` (starting with `golem/dsl/state_machine_def.rb`).
+
+
 === A Real-World Example: Seminar Registration
 
-On/Off switches are all well end good, but once you get your head around how a finite state machine works, you'll want to do something a little more useful. Here's an example of a course registration system, adapted from [Scott W. Ambler's primer on UML2 State Machine Diagrams](http://www.agilemodeling.com/artifacts/stateMachineDiagram.htm):
+Monsters and On/Off switches are all well end good, but once you get your head around how a finite state machine works, you'll probably want to do something a little more useful. Here's an example of a course registration system, adapted from "Scott W. Ambler's primer on UML2 State Machine Diagrams"[http://www.agilemodeling.com/artifacts/stateMachineDiagram.htm]:
 
 The UML state machine diagram:
 
@@ -145,7 +259,6 @@ The Ruby implementation (see blow for discussion):
       initial_state :proposed
       current_state_from :status
   
-      on_all_events Proc.new{|obj, event, event_args| puts "Firing #{event.name.inspect}(#{event_args.collect{|arg| arg.inspect}.join(",")})"}
       on_all_transitions Proc.new{|obj, event, transition, event_args| puts "Transitioning from #{transition.from.name.inspect} to #{transition.to.name.inspect}"}
     end
   end
@@ -183,15 +296,15 @@ The Ruby implementation (see blow for discussion):
   s.drop_student! "eva"
   puts s.inspect
 
-There are a number of things to note in the above code:
+There are a few things to note in the above code:
 
- 1. We use `current_state_from` to tell Golem that the current state will be stored in the `status` column (by
-    default the state is stored in the `state` column).
- 2. We log each transition by specifying a callback function using `on_all_transitions`. The Seminar object's 
-    `log_transition` method will be called on each successful transition. The Event that caused the transition, 
-    and the Transition itself are automatically passed as the first two arguments to the callback, along with any 
-    other arguments that may have been passed in the event trigger.
- 3. 
+1. We use `current_state_from` to tell Golem that the current state will be stored in the `status` column (by
+   default the state is stored in the `state` column).
+2. We log each transition by specifying a callback function for `on_all_transitions`. The Seminar object's 
+   `log_transition` method will be called on each successful transition. The Event that caused the transition, 
+   and the Transition itself are automatically passed as the first two arguments to the callback, along with any 
+   other arguments that may have been passed in the event trigger.
+
 
 
 == Installation
