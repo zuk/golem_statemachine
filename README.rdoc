@@ -1,22 +1,17 @@
 = Golem Statemachine
 
-=== Contents
-
-1. <b>Intro</b>
-2. <b>A Trivial Example: The ON/OFF Switch</b>
-3. <b>The DSL Syntax: A Tutorial</b>
-4. <b>A Real-World Example: Seminar Registration</b>
-5. <b>Installation</b>
-6. <b>Gollem vs. AASM</b>
-
-
-
 Golem adds {Finite State Machine (FSM)}[http://en.wikipedia.org/wiki/Finite_state_machine] behaviour to Ruby classes. Basically, you get a nice DSL (domain-specific language) for defining the FSM rules, and some functionality to enforce those rules in your objects. Although Golem was designed specifically with ActiveRecord in mind, it should work with any Ruby object.
 
 Although the FSM pattern can potentially apply to a number of scenarios, in practice you'll probably find it most useful in implementing complex business logic -- the kind that requires multi-page UML diagrams describing an entity's behavior over a series of events. Golem makes it much easier to implement and keep track of complicated, stateful behaviour, and the DSL you use to define your state machine in Ruby is specifically designed to make translation to and from UML easy.
 
-See below for installation instructions. But first, some examples:
 
+==== Contents
+
+1. <b>A Trivial Example: The ON/OFF Switch</b>
+2. <b>The DSL Syntax: A Tutorial</b>
+3. <b>A Real-World Example: Seminar Registration</b>
+4. <b>Installation</b>
+5. <b>Gollem vs. AASM</b>
 
 === A Trivial Example: The ON/OFF Switch
 
