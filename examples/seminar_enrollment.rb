@@ -34,11 +34,11 @@ class Seminar
   end
 
   def notify_waiting_list_that_enrollment_is_closed
-    @waiting_list.each{|student| puts "#{student}: waiting list is closed!"
+    @waiting_list.each{|student| puts "#{student}: waiting list is closed!"}
   end
 
   def notify_students_that_the_seminar_is_cancelled
-    (@students + @waiting_list).each{|student| puts "#{student}: the seminar has been cancelled!"
+    (@students + @waiting_list).each{|student| puts "#{student}: the seminar has been cancelled!"}
   end  
 
 
