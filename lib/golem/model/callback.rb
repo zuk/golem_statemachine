@@ -1,10 +1,9 @@
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
-
 module Golem
   module Model
     class Callback
-      def initialize(callback)
+      attr_accessor :callback
+
+      def initialize(callback, options = {})
         @callback = callback
       end
 
@@ -15,10 +14,6 @@ module Golem
             @callback.call(obj, *args)
           else
             @callback.call(obj)
-          end
-        when Array
-          @callback.each do |c|
-            self.class.new(c).call(*args)
           end
         else
           if obj.method(@callback).arity.abs > 0

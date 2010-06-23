@@ -7,42 +7,62 @@ require 'golem/dsl/state_def'
 module Golem
   module DSL
     class StateMachineDef
-      attr_accessor :current_state_method
+      attr_reader :machine_name
 
-      def initialize
-        @machine = Golem::Model::StateMachine.new
-        @current_state_method ||= :state
+      def initialize(klass, machine_name = nil, &block)
+        @klass = klass # this is the Class that we to endow with FSM behaviour
+        @machine = Golem::Model::StateMachine.new(machine_name)
+        instance_eval(&block) if block
       end
 
       def machine
         @machine
       end
 
-      def state(name, &block)
-        s = Golem::DSL::StateDef.new(@machine, name)
-        s.instance_eval(&block) if block
+      def state(state_name, options = {}, &block)
+        Golem::DSL::StateDef.new(@machine, state_name, options, &block)
       end
 
       def all_states
-        @machine.all_states.collect{|s| StateDef.new(@machine, s)}
+        @machine.all_states.collect{|state| StateDef.new(@machine, state.name)}
       end
 
       def initial_state(state)
-        @machine.initial_state = @machine.states[state] ||= Golem::Model::State.new(state)
+        @machine.initial_state = @machine.get_or_define_state(state)
       end
 
-      def current_state_from(method_name)
-        @current_state_method = method_name
+      # Sets or returns the state_attribute name.
+      def state_attribute(attribute = nil)
+        if attribute.nil?
+          @state_attribute
+        else
+          @state_attribute = attribute
+        end
       end
 
-      def on_all_transitions(callback)
+      # Sets the state_attribute name.
+      def state_attribute=(attribute)
+        @state_attribute = attribute
+      end
+
+      def on_all_transitions(callback = nil, &block)
+        raise Golem::DefinitionSyntaxError, "A callback or block must be given for on_all_transitions" unless
+          (callback || block)
+        raise Golem::DefinitionSyntaxError, "Either a callback or block, not both, must be given for on_all_transitions" if
+          (callback && block)
+        callback ||= block
         unless callback.kind_of?(Golem::Model::Callback)
           callback = Golem::Model::Callback.new(callback)
         end
         @machine.on_all_transitions = callback
       end
 
-      def on_all_events(callback)
+      def on_all_events(callback = nil, &block)
+        raise Golem::DefinitionSyntaxError, "A callback or block must be given for on_all_events" unless
+          (callback || block)
+        raise Golem::DefinitionSyntaxError, "Either a callback or block, not both, must be given for on_all_events" if
+          (callback && block)
+        callback ||= block
         unless callback.kind_of?(Golem::Model::Callback)
           callback = Golem::Model::Callback.new(callback)
         end

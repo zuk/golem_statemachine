@@ -1,5 +1,4 @@
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
+require 'golem/util/element_collection'
 
 module Golem
   module Model
@@ -11,7 +10,7 @@ module Golem
       def initialize(name)
         name = name.to_sym unless name.is_a?(Symbol)
         @name = name
-        @transitions_on_event = {}
+        @transitions_on_event = Golem::Util::ElementCollection.new
         @callbacks = {}
       end
 
