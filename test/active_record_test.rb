@@ -149,9 +149,41 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert_equal :d, foo.status
   end
 
+
+  def test_fire_entry_action_on_initial_state
+    Foo.instance_eval do
+      define_statemachine do
+        initial_state :a
+        state :a do
+          enter do |r|
+            throw :it_worked!
+          end
+          on :go, :to => :b
+        end
+        state :b
+      end
+
+      define_statemachine(:alpha) do
+        initial_state :a
+        state :a do
+          on :go, :to => :c
+        end
+        state :b
+        state :c
+        state :d
+      end
+    end
+
+    assert_throws :it_worked! do
+      foo = Foo.create
+    end
+  end
+
+
   def test_transaction_around_fire_event
     #TODO: check that transaction around fire_event is respected (i.e. changes not persisted when an execption is
     #      raised inside an event firing)
   end
+
 end
 

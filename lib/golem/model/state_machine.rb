@@ -53,6 +53,15 @@ module Golem
         obj.send("#{state_attribute}=".to_sym, state)
       end
 
+      def init(obj, *args)
+        # set the initial state
+        set_current_state_of(obj, initial_state)
+
+        # call the on_entry callback for the initial state (if defined)
+        init_state = states[get_current_state_of(obj)]
+        init_state.callbacks[:on_enter].call(obj, *args) if init_state && init_state.callbacks[:on_enter]
+      end
+
       def fire_event_with_exceptions(obj, event, *args)
         @throw_exceptions = true
         fire_event(obj, event, *args)

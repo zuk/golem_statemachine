@@ -6,6 +6,21 @@ require 'ruby-debug'
 module Golem
   def self.included(mod)
     mod.extend Golem::ClassMethods
+
+    # Override the initialize method in the object we're imbuing with statemachine
+    # functionality so that we can do statemachine initialization when the object
+    # is instantiated.
+    mod.class_eval do
+      alias_method :_initialize, :initialize
+      def initialize(*args)
+        # call the original initialize
+        _initialize(*args)
+        
+        if respond_to?(:statemachines)
+          self.statemachines.each{|name, sm| sm.init(self, *args)}
+        end
+      end
+    end
   end
 
   module ClassMethods

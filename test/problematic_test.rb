@@ -58,5 +58,38 @@ class ProblematicTest < Test::Unit::TestCase
 
     assert !widget.start
   end
+
+  def test_fire_entry_action_on_initial_state
+    @klass.instance_eval do
+      class_eval do
+        attr_accessor :off
+      end
+      
+      define_statemachine(:engine) do
+        initial_state :stopped
+        state :stopped do
+          enter do |engine|
+            engine.off = true
+          end
+          on :start, :to => :idle
+        end
+        state :idle do
+          enter do |engine|
+            engine.off = false
+          end
+          on :start, :to => :running
+        end
+      end
+    end
+
+    widget = @klass.new
+
+    assert_equal :stopped, widget.engine_state
+    assert_equal true, widget.off
+
+    widget.start!
+
+    assert_equal false, widget.off
+  end
 end
 
