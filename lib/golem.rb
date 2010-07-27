@@ -103,7 +103,10 @@ module Golem
       statemachine.events.each do |event|
         self.class_eval do
           
-          # for every event defined in each statemachine we define
+          # For every event defined in each statemachine we define a regular
+          # (non-exception-raising) method and bang! (exception-raising).
+          # This allows for triggering the event by calling the appropriate
+          # event-named method on the object.
           [event.name,"#{event.name}!"].each do |meth|
             define_method(meth) do |*args|
               fire_proc = lambda do
