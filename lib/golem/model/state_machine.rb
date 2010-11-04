@@ -120,7 +120,7 @@ module Golem
           end
 
           if @throw_exceptions
-            raise Golem::ImpossibleEvent, msg
+            raise Golem::ImpossibleEvent.new(msg, event, obj, @cannot_transition_because)
           else
             obj.transition_errors << msg
           end

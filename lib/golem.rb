@@ -139,7 +139,14 @@ module Golem
                 end
                 if impossible.size == self.statemachines.size
                   # all statemachines raised Golem::ImpossibleEvent
-                  raise Golem::ImpossibleEvent, impossible.values.collect{|e| e.message}.uniq.join("\n")
+                  message = impossible.values.collect{|e| e.message}.uniq.join("\n")
+                  events = impossible.values.collect{|e| e.event}.uniq
+                  events = events[0] if events.size <= 1
+                  objects = impossible.values.collect{|e| e.object}.uniq
+                  objects = objects[0] if objects.size <= 1
+                  reasons = impossible.values.collect{|e| e.reasons}.flatten.uniq
+                  reasons = reasons[0] if reasons.size <= 1
+                  raise Golem::ImpossibleEvent.new(message, events, objects, reasons)
                 end
                 results.all?{|result| result == true}
               end
@@ -172,6 +179,24 @@ module Golem
   end
 
   class ImpossibleEvent < StandardError
+    attr_reader :event, :object, :reasons
+    def initialize(message, event = nil, object = nil, reasons = nil)
+      @event = event
+      @object = object
+      @reasons = reasons
+      super(message)
+    end
+
+    def human_explanation
+      event = [@event] unless @event.is_a?(Array)
+      object = [@object] unless @object.is_a?(Array)
+      "'#{event.collect{|ev|ev.name.to_s.humanize.upcase}.join("/")}' for #{object.collect{|ob|ob.to_s}.join("/")} failed"
+    end
+
+    def human_reasons
+      reasons = [@reasons] unless @reasons.is_a?(Array)
+      reasons
+    end
   end
 
   class DefinitionSyntaxError < StandardError
