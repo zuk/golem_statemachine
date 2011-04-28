@@ -1,8 +1,7 @@
-require 'rubygems'
 require 'activesupport'
 
 require 'golem/dsl/state_machine_def'
-require 'ruby-debug'
+
 module Golem
   def self.included(mod)
     mod.extend Golem::ClassMethods
