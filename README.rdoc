@@ -24,11 +24,24 @@ easy.
 
 == 1. Installation
 
-Install as a Rails plugin:
+Install as a Gem:
+
+  gem install golem_statemachine
+
+Then, if you're using Rails 2.3.x, in your environment.rb:
+
+  config.gem 'golem_statemachine', :lib => 'golem'
+
+And if you're using Rails 3.x, add it to your Gemfile:
+
+  gem 'golem_statemachine', :require => 'golem'
+
+Or, install as a Rails plugin:
 
   script/plugin install git://github.com/zuk/golem_statemachine.git
 
-If using Golem in an ActiveRecord model:
+
+If you're using Golem in an ActiveRecord model:
 
   class Example < ActiveRecord::Base
 
