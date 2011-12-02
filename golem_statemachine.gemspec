@@ -1,7 +1,7 @@
 
 $gemspec = Gem::Specification.new do |s|
   s.name     = 'golem_statemachine'
-  s.version  = '0.9'
+  s.version  = '0.9.1'
   s.authors  = ["Matt Zukowski"]
   s.email    = ["matt@roughest.net"]
   s.homepage = 'http://github.com/zuk/golem_statemachine'
@@ -16,7 +16,7 @@ $gemspec = Gem::Specification.new do |s|
 
   s.extra_rdoc_files = ["README.rdoc", "MIT-LICENSE"]
 
-  s.add_dependency("activesupport")
+  s.add_dependency("active_support")
 
   s.rdoc_options = [
     '--quiet', '--title', 'Golem Statmeachine Docs', '--opname',
