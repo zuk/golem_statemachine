@@ -1,4 +1,4 @@
-require 'active_support'
+require 'active_support/all'
 
 require 'golem/dsl/state_machine_def'
 

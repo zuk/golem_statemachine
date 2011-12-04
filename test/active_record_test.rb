@@ -10,9 +10,7 @@ rescue
   require 'sqlite3'
 end
 
-require 'activerecord'
-
-require 'ruby-debug'
+require 'active_record'
 
 class ActiveRecordTest < Test::Unit::TestCase
 
