@@ -111,6 +111,102 @@ class MonsterTest < Test::Unit::TestCase
     assert_equal :two, obj.alpha_state
     assert_equal :three, obj.foo
   end
+  
+  def test_define_state_attribute_reader_symbol
+    @klass.instance_eval do
+      define_statemachine do
+        initial_state :one
+        
+        state_attribute_reader :foo
+        
+        state :worked
+      end
+      
+      define_method(:foo) do
+        return :worked
+      end
+    end
+
+    obj = @klass.new
+    assert_equal :worked, obj.state
+  end
+  
+  def test_define_state_attribute_reader_proc
+    @klass.instance_eval do
+      define_statemachine do
+        initial_state :one
+        
+        state_attribute_reader(Proc.new do |obj|
+          obj.foo
+        end)
+        
+        state :worked
+      end
+      
+      define_method(:foo) do
+        return :worked
+      end
+    end
+
+    obj = @klass.new
+    assert_equal :worked, obj.state
+  end
+  
+  def test_define_state_attribute_writer_symbol
+    @klass.instance_eval do
+      define_statemachine do
+        initial_state :one
+        
+        state_attribute_writer :foo=
+        state_attribute_reader :foo
+        
+        state :worked
+      end
+      
+      define_method(:foo=) do |new_state|
+        @foo = new_state
+      end
+      define_method(:foo) do
+        @foo
+      end
+    end
+
+    obj = @klass.new
+    assert_equal :one, obj.state
+    
+    obj.state = :worked
+    assert_equal :worked, obj.state
+    assert_equal :worked, obj.instance_variable_get(:@foo)
+  end
+  
+  def test_define_state_attribute_writer_proc
+    @klass.instance_eval do
+      define_statemachine do
+        initial_state :one
+        
+        state_attribute_writer(Proc.new do |obj, new_state|
+          obj.foo = new_state
+        end)
+        state_attribute_reader :foo
+        
+        state :worked
+      end
+      
+      define_method(:foo=) do |new_state|
+        @foo = new_state
+      end
+      define_method(:foo) do
+        @foo
+      end
+    end
+
+    obj = @klass.new
+    assert_equal :one, obj.state
+    
+    obj.state = :worked
+    assert_equal :worked, obj.state
+    assert_equal :worked, obj.instance_variable_get(:@foo)
+  end
 
 
   def test_define_states

@@ -42,7 +42,17 @@ module Golem
 
       # Sets the state_attribute name.
       def state_attribute=(attribute)
-        @state_attribute = attribute
+        @machine.state_attribute = attribute
+      end
+      
+      # Sets the state_attribute reader.
+      def state_attribute_reader(reader = nil)
+        @machine.state_attribute_reader = reader
+      end
+      
+      # Sets the state_attribute writer.
+      def state_attribute_writer(writer = nil)
+        @machine.state_attribute_writer = writer
       end
 
       def on_all_transitions(callback = nil, &block)

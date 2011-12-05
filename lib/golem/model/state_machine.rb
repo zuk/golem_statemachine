@@ -10,6 +10,8 @@ module Golem
     class StateMachine
       attr_accessor :name
       attr_accessor :state_attribute
+      attr_accessor :state_attribute_reader
+      attr_accessor :state_attribute_writer
       attr_reader :states
       attr_reader :events
       attr_accessor :transition_errors
@@ -26,6 +28,7 @@ module Golem
         @events = Golem::Util::ElementCollection.new(Golem::Model::Event)
         @transition_errors = []
         @throw_exceptions = false
+        @is_transitioning = false
       end
 
       def initial_state
@@ -44,6 +47,11 @@ module Golem
       def all_events
         @events
       end
+      
+      # true if this statemachine is currently in the middle of a transition
+      def is_transitioning?
+        @is_transitioning
+      end
 
       def get_current_state_of(obj)
         obj.send(state_attribute)
@@ -53,13 +61,9 @@ module Golem
         obj.send("#{state_attribute}=".to_sym, state)
       end
 
-      def init(obj, *args)
+      def init(obj)
         # set the initial state
-        set_current_state_of(obj, initial_state)
-
-        # call the on_entry callback for the initial state (if defined)
-        init_state = states[get_current_state_of(obj)]
-        init_state.callbacks[:on_enter].call(obj, *args) if init_state && init_state.callbacks[:on_enter]
+        set_current_state_of(obj, get_current_state_of(obj) || initial_state)
       end
 
       def fire_event_with_exceptions(obj, event, *args)
@@ -79,22 +83,36 @@ module Golem
         on_all_events.call(obj, event, args) if on_all_events
 
         if transition
-          before_state = states[get_current_state_of(obj)]
-          before_state.callbacks[:on_exit].call(obj, *args) if before_state.callbacks[:on_exit]
+          @is_transitioning = true
+          begin
+            before_state = states[get_current_state_of(obj)]
+            before_state.callbacks[:on_exit].call(obj, *args) if before_state.callbacks[:on_exit]
           
-          set_current_state_of(obj, transition.to.name)
-          transition.callbacks[:on_transition].call(obj, *args) if transition.callbacks[:on_transition]
-          on_all_transitions.call(obj, event, transition, *args) if on_all_transitions
+            set_current_state_of(obj, transition.to.name)
+            transition.callbacks[:on_transition].call(obj, *args) if transition.callbacks[:on_transition]
+            on_all_transitions.call(obj, event, transition, *args) if on_all_transitions
 
-          after_state = states[get_current_state_of(obj)]
-          after_state.callbacks[:on_enter].call(obj, *args) if after_state.callbacks[:on_enter]
+            after_state = states[get_current_state_of(obj)]
+            after_state.callbacks[:on_enter].call(obj, *args) if after_state.callbacks[:on_enter]
+          ensure
+            @is_transitioning = false
+          end
           
           save_result = true
-          if @throw_exceptions
-            save_result = obj.save! if obj.respond_to?(:save!)
-          else
-            save_result = obj.save if obj.respond_to?(:save)
+          if obj.respond_to?(:save!)
+            if @throw_exceptions
+              save_result = obj.save!
+            else
+              (save_result = obj.save!) rescue return false
+            end
+          elsif obj.respond_to?(:save)
+            if @throw_exceptions
+              save_result = obj.save
+            else
+              (save_result = obj.save) rescue return false
+            end
           end
+          
           return save_result
         else
           return false

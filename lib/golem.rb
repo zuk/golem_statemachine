@@ -1,27 +1,45 @@
 require 'active_support/all'
 
 require 'golem/dsl/state_machine_def'
-
+require 'ruby-debug'
 module Golem
+
   def self.included(mod)
     mod.extend Golem::ClassMethods
 
     # Override the initialize method in the object we're imbuing with statemachine
     # functionality so that we can do statemachine initialization when the object
     # is instantiated.
+    #
+    # For ActiveRecord, we use the after_initialize callback instead.
+    # FIXME: should use an ActiveRecord::Observer here since this will conflict with
+    #        any user-set after_initialize callback.
     mod.class_eval do
-      alias_method :_initialize, :initialize
-      def initialize(*args)
-        # call the original initialize
-        _initialize(*args)
+      if Object.const_defined?('ActiveRecord') && mod < ActiveRecord::Base
         
-        if respond_to?(:statemachines)
-          self.statemachines.each{|name, sm| sm.init(self, *args)}
+        after_initialize do
+          if respond_to?(:statemachines)
+            self.statemachines.each{|name, sm| sm.init(self)}
+          end
         end
+        
+      else
+        
+        alias_method :_initialize, :initialize
+
+        def initialize(*args)
+          # call the original initialize
+          _initialize(*args)
+
+          if respond_to?(:statemachines)
+            self.statemachines.each{|name, sm| sm.init(self)}
+          end
+        end
+        
       end
     end
   end
-
+  
   module ClassMethods
     def define_statemachine(statemachine_name = nil, options = {}, &block)
       default_statemachine_name = :statemachine
@@ -64,9 +82,14 @@ module Golem
 
       # state reader
       define_method("#{state_attribute}".to_sym) do
+        # TODO: the second two cases here should be collapsed into the first
         case
-        when state_attribute.respond_to?(:call)
-          state = state_attribute.call(self)
+        when statemachine.state_attribute_reader
+          if statemachine.state_attribute_reader.respond_to?(:call)
+            state = statemachine.state_attribute_reader.call(self)
+          else
+            state = self.send(statemachine.state_attribute_reader)
+          end
         when Object.const_defined?('ActiveRecord') && self.kind_of?(ActiveRecord::Base)
           state = self[state_attribute.to_s] && self[state_attribute.to_s].to_sym
         else
@@ -89,13 +112,30 @@ module Golem
         new_state = new_state.to_sym
         raise ArgumentError, "#{new_state.inspect} is not a valid state for #{statemachine}!" unless statemachine.states[new_state]
         
+        # transition takes care of calling on_exit, so don't do it if we're in the middle of a transition
+        unless statemachine.is_transitioning?
+          from_state_obj = statemachine.states[self.send("#{state_attribute}")]
+          from_state_obj.callbacks[:on_exit].call(self) if from_state_obj.callbacks[:on_exit]
+        end
+        
+        # TODO: the second two cases here whould be collapsed into the first
         case
-        when state_attribute.respond_to?(:call)
-          state_attribute.call(self, new_state)
+        when statemachine.state_attribute_writer
+          if statemachine.state_attribute_writer.respond_to?(:call)
+            statemachine.state_attribute_writer.call(self, new_state)
+          else
+            self.send(statemachine.state_attribute_writer, new_state)
+          end
         when Object.const_defined?('ActiveRecord') && self.kind_of?(ActiveRecord::Base)
           self[state_attribute.to_s] = new_state.to_s # store as String rather than Symbol to prevent serialization weirdness
         else
           self.instance_variable_set("@#{state_attribute}", new_state)
+        end
+        
+        # transition takes care of calling on_entry, so don't do it if we're in the middle of a transition
+        unless statemachine.is_transitioning?
+          new_state_obj = statemachine.states[new_state]
+          new_state_obj.callbacks[:on_enter].call(self) if new_state_obj.callbacks[:on_enter]
         end
       end
 

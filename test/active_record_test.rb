@@ -43,7 +43,7 @@ class ActiveRecordTest < Test::Unit::TestCase
   def teardown
     self.class.send(:remove_const, :Foo)
   end
-
+  
   def test_restore_state
     foo = Foo.create(
       :state => 'b',
@@ -175,6 +175,55 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert_throws :it_worked! do
       foo = Foo.create
     end
+  end
+  
+  
+  def test_fire_entry_action_on_restore_state
+    foo = Foo.create(
+      :state => 'b',
+      :alpha_state => 'c',
+      :status => 'd'
+    )
+    
+    Foo.instance_eval do
+      define_statemachine do
+        initial_state :a
+        state :a
+        state :b, :enter => proc{|foo| foo.instance_variable_set(:@woot, "yup")}
+        state :c
+        state :d
+      end
+
+      define_statemachine(:alpha) do
+        initial_state :a
+        state :a
+        state :b, :enter => proc{|foo| foo.instance_variable_set(:@woot, "nope")}
+        state :c
+        state :d
+      end
+
+      define_statemachine(:beta) do
+        state_attribute(:status)
+        initial_state :a
+        state :a, :enter => proc{|foo| foo.instance_variable_set(:@woot, "poop")}
+        state :b
+        state :c
+        state :d
+      end
+    end
+
+    foo = Foo.find(foo.id)
+
+    assert_equal "yup", foo.instance_variable_get(:@woot)
+
+    # check that initial state works too
+    foo = Foo.create
+    
+    assert_equal "poop", foo.instance_variable_get(:@woot)
+
+    foo = Foo.find(foo.id)
+
+    assert_equal "poop", foo.instance_variable_get(:@woot)
   end
 
 
