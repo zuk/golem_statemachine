@@ -84,19 +84,18 @@ module Golem
 
         if transition
           @is_transitioning = true
-          begin
-            before_state = states[get_current_state_of(obj)]
-            before_state.callbacks[:on_exit].call(obj, *args) if before_state.callbacks[:on_exit]
           
-            set_current_state_of(obj, transition.to.name)
-            transition.callbacks[:on_transition].call(obj, *args) if transition.callbacks[:on_transition]
-            on_all_transitions.call(obj, event, transition, *args) if on_all_transitions
+          before_state = states[get_current_state_of(obj)]
+          before_state.callbacks[:on_exit].call(obj, *args) if before_state.callbacks[:on_exit]
+        
+          set_current_state_of(obj, transition.to.name)
+          transition.callbacks[:on_transition].call(obj, *args) if transition.callbacks[:on_transition]
+          on_all_transitions.call(obj, event, transition, *args) if on_all_transitions
 
-            after_state = states[get_current_state_of(obj)]
-            after_state.callbacks[:on_enter].call(obj, *args) if after_state.callbacks[:on_enter]
-          ensure
-            @is_transitioning = false
-          end
+          after_state = states[get_current_state_of(obj)]
+          after_state.callbacks[:on_enter].call(obj, *args) if after_state.callbacks[:on_enter]
+          
+          @is_transitioning = false
           
           save_result = true
           if obj.respond_to?(:save!)
