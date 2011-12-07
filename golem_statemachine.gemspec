@@ -1,7 +1,7 @@
 
 $gemspec = Gem::Specification.new do |s|
   s.name     = 'golem_statemachine'
-  s.version  = '0.9.3'
+  s.version  = '0.9.4'
   s.authors  = ["Matt Zukowski"]
   s.email    = ["matt@roughest.net"]
   s.homepage = 'http://github.com/zuk/golem_statemachine'
