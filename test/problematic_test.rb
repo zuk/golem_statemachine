@@ -1,5 +1,4 @@
 require 'test_helper'
-require 'ruby-debug'
 
 # Tests specifically designed to address bugs/problems discovered along the way.
 class ProblematicTest < Test::Unit::TestCase

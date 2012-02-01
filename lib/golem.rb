@@ -1,7 +1,6 @@
 require 'active_support/all'
-
 require 'golem/dsl/state_machine_def'
-require 'ruby-debug'
+
 module Golem
 
   def self.included(mod)
