@@ -14,20 +14,23 @@ end
 
 module Golem
   class Visualizer
-    def visualize(statemachine)
-      @state_nodes = {}
+    def initialize(statemachine)    
       @statemachine = statemachine
+    end
+    
+    def visualize(format, filename)
+      @state_nodes = {}
       @current_path = []
       
       @graph = GraphViz.new(:G, 
         :type => :digraph, 
         :fontname => "Verdana", 
-        :concentrate => true)
+        :concentrate => false)
       
       state = @statemachine.states[@statemachine.initial_state]
       visualize_state(state)
       
-      @graph.output(:png => "statemachine.png")
+      @graph.output(format => filename)
     end
     
     protected
@@ -65,7 +68,15 @@ module Golem
         n[:fontname] = "Verdana"
         n[:shape] = "box"
         n[:style] = "rounded,filled"
-        n[:fillcolor] = "lightblue"
+        
+        if @current_path.first == state.name
+          n[:fillcolor] = "palegreen"
+        elsif state.transitions_on_event.empty?
+          n[:fillcolor] = "red3"
+        else
+          n[:fillcolor] = "lightblue"
+        end
+        
         n[:label] = "<<font>#{state.name}</font>#{actions.join("<br />")}>"
         @state_nodes[state.name] = n
       end
@@ -74,15 +85,31 @@ module Golem
       puts state.name.to_s
       @statemachine.events.each do |ev|
         transitions = state.transitions_on_event[ev.name] || []
+        
+        if transitions.size > 1
+          dn = @graph.add_nodes("#{state.name}_#{ev.name}")
+          dn[:fontname] = "Verdana"
+          dn[:shape] = "diamond"
+          dn[:style] = "filled"
+          dn[:fillcolor] = "khaki1"
+          dn[:label] = ""
+          
+          de = @graph.add_edges(n, dn)
+          de[:label] = "<<font face=\"Verdana-Bold\">#{ev.name}</font>>"
+        else
+          dn = false
+          de = false
+        end
+        
         transitions.each do |transition|
           puts " --[ #{ev.name} ]--> #{transition.to.name}"
-          edge = @graph.add_edges(n, transition.to.name.to_s)
+          edge = @graph.add_edges(dn || n, transition.to.name.to_s)
           
           guard = nil
           unless transition.guards.empty?
             guard = transition.guards.collect do |g|
               format_callback_code(g)
-            end.join(" and ")
+            end.join(" and \n")
             
             guard = "[#{guard.strip}]\n"
           end
@@ -98,10 +125,14 @@ module Golem
           end
           
           if guard
-            guard = "<font face=\"Courier\" point-size=\"11\">#{html.encode(guard)}</font><br align=\"left\" />"
+            guard = "<font face=\"Courier\" point-size=\"11\">#{html.encode(guard).gsub(/\n/,'<br />')}</font><br align=\"left\" />"
           end
-          label = "<<font face=\"Verdana\">#{guard}<font face=\"Verdana-Bold\"> #{html.encode(ev.name)} </font> #{action}</font>>"
-          edge[:label] = label
+          
+          if dn
+            edge[:label] = "<<font face=\"Verdana\">#{guard} #{action}</font>>"
+          else
+            edge[:label] = "<<font face=\"Verdana\">#{guard}<font face=\"Verdana-Bold\"> #{html.encode(ev.name)} </font> #{action}</font>>"
+          end
           
           tos << transition.to
         end
