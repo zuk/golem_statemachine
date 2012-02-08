@@ -24,6 +24,10 @@ module Golem
       def each
         @collection.values.each{|v| yield v}
       end
+      
+      def empty?
+        @collection.empty?
+      end
 
       def values
         @collection.values
