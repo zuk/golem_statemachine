@@ -25,7 +25,7 @@ module Golem
       @graph = GraphViz.new(:G, 
         :type => :digraph, 
         :fontname => "Verdana", 
-        :concentrate => false)
+        :concentrate => true)
       
       state = @statemachine.states[@statemachine.initial_state]
       visualize_state(state)
@@ -83,6 +83,7 @@ module Golem
       
       tos = []
       puts state.name.to_s
+      
       @statemachine.events.each do |ev|
         transitions = state.transitions_on_event[ev.name] || []
         
@@ -121,7 +122,7 @@ module Golem
           end
           
           if action
-            action = "<br /> / <font face=\"Courier\" point-size=\"11\">#{html.encode(action).gsub(/\n/,'<br />')}</font> "
+            action = "<br /> / <font face=\"Courier\" point-size=\"11\">#{html.encode(action).gsub(/\n/,'<br align="left" />')}</font> "
           end
           
           if guard
@@ -165,7 +166,7 @@ module Golem
             line_code = IO.readlines(file)[line]
             break if line_code.match(/end/) # FIXME, looking for end of block
             next if line_code.match(/log/) # FIXME, trying to ignore log lines
-            callback_code << line_code.strip + "\n   "
+            callback_code << line_code.strip + "\n  "
           end
         end
         
