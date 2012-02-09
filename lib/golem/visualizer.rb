@@ -134,14 +134,7 @@ module Golem
             guard = "<font face=\"Courier\" point-size=\"11\">#{html.encode(guard).gsub(/\n/,'<br />')}</font><br align=\"left\" />"
           end
           
-          comment = nil
-          comment = ev.comment if ev.comment
-          if comment
-            comment += "\n#{transition.comment}"
-          else
-            comment = transition.comment
-          end
-          
+          comment = transition.comment
           if comment
             comment = "<font color=\"indigo\" font-face=\"Verdana-Italic\" point-size=\"11\">#{html.encode(comment).gsub(/\n/,'<br />')}</font>"
           end
