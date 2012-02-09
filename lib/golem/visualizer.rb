@@ -77,7 +77,12 @@ module Golem
           n[:fillcolor] = "lightblue"
         end
         
-        n[:label] = "<<font>#{state.name}</font>#{actions.join("<br />")}>"
+        comment = nil
+        if state.comment
+          comment = "<br /><font color=\"indigo\" font-face=\"Verdana-Italic\" point-size=\"11\">#{html.encode(state.comment).gsub(/\n/,'<br />')}</font>"
+        end
+        
+        n[:label] = "<<font>#{state.name}</font>#{comment}#{actions.join("<br align=\"left\" />")}>"
         @state_nodes[state.name] = n
       end
       
