@@ -7,9 +7,8 @@ any Ruby object.
 
 The Finite State Machine pattern has many potential uses, but in practice you'll probably find it most useful in
 implementing complex business logic -- the kind that requires multi-page UML diagrams describing an entity's behavior
-over a series of events. Golem makes it much easier to implement and keep track of complicated, stateful behaviour,
-and the DSL you use to define your state machine in Ruby is specifically designed to make translation to and from UML
-easy.
+over a series of events. Golem's DSL is specifically designed to have close correspondence with UML diagrams. Golem
+also includes the ability to automatically generate UML sequence diagrams from statemachines using GraphViz.
 
 
 ==== Contents
