@@ -129,10 +129,22 @@ module Golem
             guard = "<font face=\"Courier\" point-size=\"11\">#{html.encode(guard).gsub(/\n/,'<br />')}</font><br align=\"left\" />"
           end
           
-          if dn
-            edge[:label] = "<<font face=\"Verdana\">#{guard} #{action}</font>>"
+          comment = nil
+          comment = ev.comment if ev.comment
+          if comment
+            comment += "\n#{transition.comment}"
           else
-            edge[:label] = "<<font face=\"Verdana\">#{guard}<font face=\"Verdana-Bold\"> #{html.encode(ev.name)} </font> #{action}</font>>"
+            comment = transition.comment
+          end
+          
+          if comment
+            comment = "<font color=\"indigo\" font-face=\"Verdana-Italic\" point-size=\"11\">#{html.encode(comment).gsub(/\n/,'<br />')}</font>"
+          end
+          
+          if dn
+            edge[:label] = "<<font face=\"Verdana\">#{guard} #{action}#{comment}</font>>"
+          else
+            edge[:label] = "<<font face=\"Verdana\">#{guard}<font face=\"Verdana-Bold\"> #{html.encode(ev.name)} </font> #{action}#{comment}</font>>"
           end
           
           tos << transition.to

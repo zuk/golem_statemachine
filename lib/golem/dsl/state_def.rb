@@ -22,6 +22,10 @@ module Golem
            @state.callbacks[:on_exit] = Golem::Model::Callback.new(options[:exit])
         end
         
+        if options[:comment]
+          @state.comment = options[:comment]
+        end
+        
         instance_eval(&block) if block
       end
 
@@ -39,6 +43,14 @@ module Golem
         raise Golem::DefinitionSyntaxError, "Exit action already set." if @state.callbacks[:on_exit]
         raise Golem::DefinitionSyntaxError, "Provide either a callback method or a block, not both." if callback && block
         @state.callbacks[:on_exit] = Golem::Model::Callback.new(block || callback)
+      end
+      
+      def comment(comment)
+        if @state.comment
+          @state.comment += "\n#{comment}"
+        else
+          @state.comment = comment
+        end
       end
     end
   end

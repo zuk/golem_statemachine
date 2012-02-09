@@ -6,6 +6,8 @@ module Golem
       attr_reader :name
       attr_reader :callbacks
       attr_reader :transitions_on_event
+      
+      attr_accessor :comment
 
       def initialize(name)
         name = name.to_sym unless name.is_a?(Symbol)

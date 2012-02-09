@@ -8,6 +8,8 @@ module Golem
       attr_reader :to
       attr_accessor :guards
       attr_accessor :callbacks
+      
+      attr_accessor :comment
 
       def initialize(from, to, guards = [], callbacks = {})
         @from = from

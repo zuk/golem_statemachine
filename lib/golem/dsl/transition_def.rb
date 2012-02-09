@@ -14,11 +14,15 @@ module Golem
         else
           @to = @machine.get_or_define_state(options[:to])
         end
-
+        
         callbacks = {}
         callbacks[:on_transition] = options[:action] if options[:action]
 
         @transition = Golem::Model::Transition.new(@from, @to || @from, options[:guards], callbacks)
+
+        if options[:comment]
+          @transition.comment = options[:comment]
+        end
 
         instance_eval(&block) if block
 
@@ -45,6 +49,14 @@ module Golem
         callback = block unless callback
 
         @transition.callbacks[:on_transition] = Golem::Model::Callback.new(callback)
+      end
+      
+      def comment(comment)
+        if @transition.comment
+          @transition.comment += "\n#{comment}"
+        else
+          @transition.comment = comment
+        end
       end
     end
   end

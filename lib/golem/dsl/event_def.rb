@@ -11,6 +11,10 @@ module Golem
         if options[:to]
           @to = @machine.get_or_define_state(options[:to])
         end
+        
+        if options[:comment]
+          @event.comment = options[:comment]
+        end
 
         @guards = []
 
@@ -82,6 +86,14 @@ module Golem
         callback = block unless callback
 
         @action = Golem::Model::Callback.new(callback)
+      end
+      
+      def comment(comment)
+        if @event.comment
+          @event.comment += "\n#{comment}"
+        else
+          @event.comment = comment
+        end
       end
 
     end
