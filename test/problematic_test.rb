@@ -76,7 +76,7 @@ class ProblematicTest < Test::Unit::TestCase
           enter do |engine|
             engine.off = false
           end
-          on :start, :to => :running
+          on :put_in_gear, :to => :running
         end
       end
     end
@@ -89,6 +89,58 @@ class ProblematicTest < Test::Unit::TestCase
     widget.start!
 
     assert_equal false, widget.off
+  end
+  
+  def test_state_enter_and_exit_actions
+    @klass.instance_eval do
+      class_eval do
+        attr_accessor :off
+        attr_accessor :lights
+      end
+      
+      define_statemachine(:engine) do
+        initial_state :stopped
+        state :stopped do
+          enter do |engine|
+            engine.off = true
+            engine.lights = :off
+          end
+          exit do |engine|
+            engine.lights = :on
+          end
+          on :start, :to => :idle
+        end
+        state :idle do
+          enter do |engine|
+            engine.off = false
+          end
+          on :put_in_gear, :to => :running
+        end
+        state :running do
+          on :stop, :to => :stopped
+        end
+      end
+    end
+    
+    widget = @klass.new
+    
+    assert_equal :off, widget.lights
+    
+    widget.start!
+    
+    assert_equal :on, widget.lights
+    
+    widget.put_in_gear!
+    
+    assert_equal :on, widget.lights
+    
+    widget.stop!
+    
+    assert_equal :off, widget.lights
+    
+    widget.start!
+    
+    assert_equal :on, widget.lights
   end
 end
 
