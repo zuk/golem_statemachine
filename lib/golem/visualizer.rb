@@ -115,7 +115,7 @@ module Golem
           unless transition.guards.empty?
             guard = transition.guards.collect do |g|
               format_callback_code(g)
-            end.join(" and \n")
+            end.join(" and ")
             
             guard = "[#{guard.strip}]\n"
           end
@@ -168,15 +168,18 @@ module Golem
         code = IO.readlines(file)[line].strip
         if /\{(?:\|.+\|)?(.*)\}/ =~ code
           callback_code = $~[1].strip
-        elsif /do\s+\|.+\|/ =~ code
+        elsif /(do\s+\|.+\|)|(\{\s+\|)/ =~ code
+          matching = $~[0].include?("do") ? /end/ : /^\s*\}/ # FIXME: this is awful
           line_code = ""
           callback_code = ""
+          lines = IO.readlines(file)
+          first_indent = lines[line+1].match(/(^\s+)/)[1]
           while true
             line += 1 
-            line_code = IO.readlines(file)[line]
-            break if line_code.match(/end/) # FIXME, looking for end of block
+            line_code = lines[line]
+            break if line_code.match(matching) # FIXME, looking for end of block
             next if line_code.match(/log/) # FIXME, trying to ignore log lines
-            callback_code << line_code.strip + "\n  "
+            callback_code << line_code.rstrip.gsub(/^#{first_indent}/,'') + "\n  "
           end
         end
         
