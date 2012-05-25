@@ -13,13 +13,13 @@ also includes the ability to automatically generate UML sequence diagrams from s
 
 ==== Contents
 
-1. <b>Installation</b>
-2. <b>A Trivial Example: The ON/OFF Switch</b>
-3. <b>The DSL Syntax: A Tutorial</b>
-4. <b>Using Golem with ActiveRecord</b>
-5. <b>A Real-World Example: Seminar Registration</b>
-6. <b>Multiple Statemachines in the Same Class/Model</b>
-7. <b>Gollem vs. AASM</b>
+1. <b>{Installation}[https://github.com/zuk/golem_statemachine#1-installation]</b>
+2. <b>{A Trivial Example: The ON/OFF Switch}[https://github.com/zuk/golem_statemachine#2-a-trivial-example-the-onoff-switch]</b>
+3. <b>{The DSL Syntax: A Tutorial}[https://github.com/zuk/golem_statemachine#3-the-dsl-syntax-a-tutorial]</b>
+4. <b>{Using Golem with ActiveRecord}[https://github.com/zuk/golem_statemachine#4-using-golem-with-activerecord]</b>
+5. <b>{A Real-World Example: Seminar Registration}[https://github.com/zuk/golem_statemachine#5-a-real-world-example-seminar-registration]</b>
+6. <b>{Multiple Statemachines in the Same Class/Model}[https://github.com/zuk/golem_statemachine#6-multiple-statemachines-in-the-same-classmodel]</b>
+7. <b>{Gollem vs. AASM}[https://github.com/zuk/golem_statemachine#7-golem-vs-aasm]</b>
 
 == 1. Installation
 
