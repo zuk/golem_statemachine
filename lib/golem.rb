@@ -43,7 +43,7 @@ module Golem
     def define_statemachine(statemachine_name = nil, options = {}, &block)
       default_statemachine_name = :statemachine
       
-      class_inheritable_hash(:statemachines) unless respond_to?(:statemachines)
+      class_attribute :statemachines unless respond_to?(:statemachines)
       self.statemachines ||= {}
       
       if statemachines.has_key?(statemachine_name || default_statemachine_name)
