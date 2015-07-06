@@ -1,7 +1,7 @@
 = Golem Statemachine
 
 Golem adds {Finite State Machine (FSM)}[http://en.wikipedia.org/wiki/Finite_state_machine] behaviour to Ruby classes.
-Basically, you get a nice DSL (domain-specific language) for defining the FSM rules, and some functionality to enforce
+Basically, you get a nice DSL for defining the FSM rules, and some functionality to enforce
 those rules in your objects. Although Golem was designed specifically with ActiveRecord in mind, it should work with
 any Ruby object.
 
@@ -71,7 +71,7 @@ A light switch is initially in an "off" state. When you flip the switch, it tran
 
 Here's the UML state machine diagram of an on/off switch:
 
-http://github.com/zuk/golem_statemachine/raw/master/examples/UML/on_off_switch_UML.png
+https://raw.githubusercontent.com/zuk/golem_statemachine/raw/master/examples/UML/on_off_switch_UML.png
 
 And here's what this looks like in Ruby code using Golem:
 
@@ -118,8 +118,8 @@ inside the <tt>define_statemachine</tt> block:
   end
 
 Now to create some states:
-
-http://github.com/zuk/golem_statemachine/raw/master/examples/UML/monster_1_UML.png
+raw.githubusercontent.com
+https://raw.githubusercontent.com/zuk/golem_statemachine/raw/master/examples/UML/monster_1_UML.png
 
   class Monster
     include Golem
@@ -132,7 +132,7 @@ http://github.com/zuk/golem_statemachine/raw/master/examples/UML/monster_1_UML.p
 
 And an event:
 
-http://github.com/zuk/golem_statemachine/raw/master/examples/UML/monster_2_UML.png
+https://raw.githubusercontent.com/zuk/golem_statemachine/raw/master/examples/UML/monster_2_UML.png
 
   class Monster
     include Golem
@@ -151,7 +151,7 @@ The block for each state describes what will happen when a given event occurs. I
 
 Now to make things a bit more interesting:
 
-http://github.com/zuk/golem_statemachine/raw/master/examples/UML/monster_3_UML.png
+https://raw.githubusercontent.com/zuk/golem_statemachine/raw/master/examples/UML/monster_3_UML.png
 
   class Monster
     include Golem
@@ -207,7 +207,7 @@ Finally, every state can have an <tt>enter</tt> and <tt>exit</tt> action that wi
 is entered or exited. This can be a block, a callback method (as a Symbol), or a Proc/lambda. Also, in the interest
 of leaner code, we rewrite things using more compact syntax:
 
-http://github.com/zuk/golem_statemachine/raw/master/examples/UML/monster_4_UML.png
+https://raw.githubusercontent.com/zuk/golem_statemachine/raw/master/examples/UML/monster_4_UML.png
 
  class Monster
     include Golem
@@ -273,7 +273,7 @@ from {Scott W. Ambler's primer on UML2 State Machine Diagrams}[http://www.agilem
 
 The UML state machine diagram:
 
-http://github.com/zuk/golem_statemachine/raw/master/examples/UML/seminar_enrollment_UML.png
+https://raw.githubusercontent.com/zuk/golem_statemachine/raw/master/examples/UML/seminar_enrollment_UML.png
 
 The Ruby implementation (see blow for discussion):
 
