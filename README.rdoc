@@ -71,7 +71,7 @@ A light switch is initially in an "off" state. When you flip the switch, it tran
 
 Here's the UML state machine diagram of an on/off switch:
 
-![ON/OFF Switch UML](/master/examples/UML/on_off_switch_UML.png?raw=true)
+![ON/OFF Switch UML](/examples/UML/on_off_switch_UML.png?raw=true)
 
 And here's what this looks like in Ruby code using Golem:
 
