@@ -71,7 +71,7 @@ A light switch is initially in an "off" state. When you flip the switch, it tran
 
 Here's the UML state machine diagram of an on/off switch:
 
-{rdoc-image:/examples/UML/on_off_switch_UML.png?raw=true}[/examples/UML/on_off_switch_UML.png]
+{rdoc-image:https://raw.githubusercontent.com/zuk/golem_statemachine/master/examples/UML/on_off_switch_UML.png?raw=true}[/examples/UML/on_off_switch_UML.png]
 
 And here's what this looks like in Ruby code using Golem:
 
@@ -119,7 +119,7 @@ inside the <tt>define_statemachine</tt> block:
 
 Now to create some states:
 
-{rdoc-image:/examples/UML/monster_1_UML.png?raw=true}[/examples/UML/monster_1_UML.png]
+{rdoc-image:https://raw.githubusercontent.com/zuk/golem_statemachine/master/examples/UML/monster_1_UML.png?raw=true}[/examples/UML/monster_1_UML.png]
 
   class Monster
     include Golem
@@ -151,7 +151,7 @@ The block for each state describes what will happen when a given event occurs. I
 
 Now to make things a bit more interesting:
 
-{rdoc-image:/examples/UML/monster_3_UML.png?raw=true}[/examples/UML/monster_3_UML.png]
+{rdoc-image:https://raw.githubusercontent.com/zuk/golem_statemachine/master/examples/UML/monster_3_UML.png?raw=true}[/examples/UML/monster_3_UML.png]
 
   class Monster
     include Golem
@@ -207,7 +207,7 @@ Finally, every state can have an <tt>enter</tt> and <tt>exit</tt> action that wi
 is entered or exited. This can be a block, a callback method (as a Symbol), or a Proc/lambda. Also, in the interest
 of leaner code, we rewrite things using more compact syntax:
 
-{rdoc-image:/examples/UML/monster_4_UML.png?raw=true}[/examples/UML/monster_4_UML.png]
+{rdoc-image:https://raw.githubusercontent.com/zuk/golem_statemachine/master/examples/UML/monster_4_UML.png?raw=true}[/examples/UML/monster_4_UML.png]
 
  class Monster
     include Golem
@@ -274,7 +274,7 @@ from {Scott W. Ambler's primer on UML2 State Machine Diagrams}[http://www.agilem
 The UML state machine diagram:
 
 
-{rdoc-image:/examples/UML/seminar_enrollment_UML.png?raw=true}[/examples/UML/seminar_enrollment_UML.png]
+{rdoc-image:https://raw.githubusercontent.com/zuk/golem_statemachine/master/examples/UML/seminar_enrollment_UML.png?raw=true}[/examples/UML/seminar_enrollment_UML.png]
 
 The Ruby implementation (see blow for discussion):
 
