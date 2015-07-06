@@ -71,7 +71,7 @@ A light switch is initially in an "off" state. When you flip the switch, it tran
 
 Here's the UML state machine diagram of an on/off switch:
 
-![ON/OFF Switch UML](/examples/UML/on_off_switch_UML.png?raw=true)
+![ON/OFF Switch UML](https://raw.githubusercontent.com/zuk/golem_statemachine/master/examples/UML/on_off_switch_UML.png)
 
 And here's what this looks like in Ruby code using Golem:
 
@@ -118,7 +118,7 @@ inside the <tt>define_statemachine</tt> block:
   end
 
 Now to create some states:
-raw.githubusercontent.com
+
 https://raw.githubusercontent.com/zuk/golem_statemachine/raw/master/examples/UML/monster_1_UML.png
 
   class Monster
