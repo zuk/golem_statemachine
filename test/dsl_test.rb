@@ -2,10 +2,8 @@ require 'test_helper'
 require 'statemachine_assertions'
 require File.dirname(__FILE__)+'/../lib/golem'
 
-# Because Monster has two statemachines, 'affect' and 'mouth', this test
-# allows for validating statemachine behaviour when there are multiple
-# statemachines defined within the same class.
-class MonsterTest < Test::Unit::TestCase
+
+class DslTest < Test::Unit::TestCase
   include StatemachineAssertions
 
   def setup
